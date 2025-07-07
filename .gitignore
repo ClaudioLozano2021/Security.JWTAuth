@@ -1,0 +1,197 @@
+# JWT Auth .NET 9 Project - .gitignore
+
+# Build outputs
+bin/
+obj/
+out/
+
+# Build directories
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Compiled files
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+# Test results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+*.coverage
+*.coveragexml
+TestResult.xml
+*.VisualState.xml
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet
+*.nuget.props
+*.nuget.targets
+packages/
+!packages/build/
+
+# Entity Framework
+**/Migrations/*.cs
+!**/Migrations/*Initial*.cs
+!**/Migrations/*Primer*.cs
+
+# Database files
+*.mdf
+*.ldf
+*.ndf
+*.db
+*.sqlite
+*.sqlite3
+
+# Configuration files with sensitive data
+appsettings.Production.json
+appsettings.Staging.json
+appsettings.Local.json
+secrets.json
+connectionstrings.json
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Runtime
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Publishing
+*.azurePubxml
+*.pubxml
+*.publishproj
+publish/
+
+# Azure
+csx/
+*.build.csdef
+
+# Windows Store
+AppPackages/
+BundleArtifacts/
+
+# Others
+ClientBin/
+~$*
+*~
+*.dbmdl
+*.dbproj.schemaview
+*.jfm
+*.pfx
+*.publishsettings
+
+# Backup files
+_UpgradeReport_Files/
+Backup*/
+UpgradeLog*.XML
+UpgradeLog*.htm
+
+# SQL Server files
+LocalDB/
+
+# Fakes
+FakesAssemblies/
+
+# Node.js (if using for frontend)
+node_modules/
+
+# Python (if using Python tools)
+__pycache__/
+*.pyc
+
+# MSBuild Binary Log
+*.binlog
+
+# MFractors (Xamarin)
+.mfractor/
+
+# Local History
+.localhistory/
+
+# BeatPulse healthcheck
+healthchecksdb
+
+# Ionide
+.ionide/
+
+# Fody
+FodyWeavers.xsd
+
+# JWT Auth Project Specific
+# Exclude generated JWT keys (if stored in files)
+*.key
+*.pem
+jwt-keys/
+
+# Exclude any local development databases
+UserDb.mdf
+UserDb.ldf
+UserDb_log.ldf
+
+# Exclude any generated documentation
+docs/generated/
+
+# Exclude temporary test files
+temp-test-files/
+
+# Exclude local configuration overrides
+appsettings.Developer.json
+local-settings.json
