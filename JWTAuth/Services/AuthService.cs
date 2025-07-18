@@ -26,18 +26,21 @@ namespace JwtAuthDotNet9.Services
                 return null;
             }
 
-            // Invalidar sesión anterior (sesión única)
-            await InvalidatePreviousSessionAsync(user, clientIp);
+            // Invalidar sesiones de diferentes IPs
+            await InvalidateSessionsFromOtherIpsAsync(user.Id, clientIp);
 
-            return await CreateTokenResponse(user);
+            // Crear o reutilizar sesión para esta IP
+            var session = await CreateOrUpdateSessionAsync(user.Id, clientIp);
+
+            return await CreateTokenResponse(user, session);
         }
 
-        private async Task<TokenResponseDto> CreateTokenResponse(User? user)
+        private async Task<TokenResponseDto> CreateTokenResponse(User user, UserSession session)
         {
             return new TokenResponseDto
             {
-                AccessToken = CreateToken(user),
-                RefreshToken = await GenerateAndSaveRefreshTokenAsync(user)
+                AccessToken = CreateToken(user, session),
+                RefreshToken = await GenerateAndSaveRefreshTokenAsync(session)
             };
         }
 
@@ -64,23 +67,28 @@ namespace JwtAuthDotNet9.Services
 
         public async Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request)
         {
-            var user = await ValidateRefreshTokenAsync(request.UserId, request.RefreshToken);
+            var session = await ValidateRefreshTokenAsync(request.UserId, request.RefreshToken);
+            if (session is null)
+                return null;
+
+            var user = await context.Users.FindAsync(session.UserId);
             if (user is null)
                 return null;
 
-            return await CreateTokenResponse(user);
+            return await CreateTokenResponse(user, session);
         }
 
-        private async Task<User?> ValidateRefreshTokenAsync(Guid userId, string refreshToken)
+        private async Task<UserSession?> ValidateRefreshTokenAsync(Guid userId, string refreshToken)
         {
-            var user = await context.Users.FindAsync(userId);
-            if (user is null || user.RefreshToken != refreshToken
-                || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            var session = await context.UserSessions
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.RefreshToken == refreshToken && s.IsActive);
+            
+            if (session is null || session.RefreshTokenExpiryTime <= DateTime.UtcNow)
             {
                 return null;
             }
 
-            return user;
+            return session;
         }
 
         private string GenerateRefreshToken()
@@ -91,59 +99,98 @@ namespace JwtAuthDotNet9.Services
             return Convert.ToBase64String(randomNumber);
         }
 
-        private async Task<string> GenerateAndSaveRefreshTokenAsync(User user)
+        private async Task<string> GenerateAndSaveRefreshTokenAsync(UserSession session)
         {
             var refreshToken = GenerateRefreshToken();
-            user.RefreshToken = refreshToken;
-            user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
+            session.RefreshToken = refreshToken;
+            session.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(7);
             await context.SaveChangesAsync();
             return refreshToken;
         }
 
-        private async Task InvalidatePreviousSessionAsync(User user, string? clientIp)
+        private async Task InvalidateSessionsFromOtherIpsAsync(Guid userId, string? clientIp)
         {
-            // Generar nuevo ID de sesión
-            var newSessionId = Guid.NewGuid().ToString();
-            
-            // Actualizar información de sesión
-            user.SessionId = newSessionId;
-            user.LastLoginTime = DateTime.UtcNow;
-            user.LastLoginIp = clientIp;
-            
-            // Invalidar refresh token anterior
-            user.RefreshToken = null;
-            user.RefreshTokenExpiryTime = null;
-            
+            // Invalidar sesiones activas de diferentes IPs
+            var sessionsToInvalidate = await context.UserSessions
+                .Where(s => s.UserId == userId && s.IsActive && s.IpAddress != clientIp)
+                .ToListAsync();
+
+            foreach (var session in sessionsToInvalidate)
+            {
+                session.IsActive = false;
+                session.RefreshToken = null;
+                session.RefreshTokenExpiryTime = null;
+            }
+
             await context.SaveChangesAsync();
+        }
+
+        private async Task<UserSession> CreateOrUpdateSessionAsync(Guid userId, string? clientIp)
+        {
+            // Siempre crear una nueva sesión para permitir múltiples sesiones por IP
+            var newSession = new UserSession
+            {
+                Id = Guid.NewGuid(),
+                UserId = userId,
+                SessionId = Guid.NewGuid().ToString(),
+                IpAddress = clientIp,
+                CreatedAt = DateTime.UtcNow,
+                LastActivity = DateTime.UtcNow,
+                IsActive = true
+            };
+            
+            context.UserSessions.Add(newSession);
+            await context.SaveChangesAsync();
+            return newSession;
         }
 
         public async Task<bool> IsSessionValidAsync(Guid userId, string sessionId)
         {
-            var user = await context.Users.FindAsync(userId);
-            return user is not null && user.SessionId == sessionId;
+            var session = await context.UserSessions
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.SessionId == sessionId && s.IsActive);
+            return session is not null;
         }
 
         public async Task LogoutAsync(Guid userId)
         {
-            var user = await context.Users.FindAsync(userId);
-            if (user is not null)
+            // Invalidar todas las sesiones del usuario
+            var sessions = await context.UserSessions
+                .Where(s => s.UserId == userId && s.IsActive)
+                .ToListAsync();
+
+            foreach (var session in sessions)
             {
-                // Invalidar sesión y tokens
-                user.SessionId = null;
-                user.RefreshToken = null;
-                user.RefreshTokenExpiryTime = null;
+                session.IsActive = false;
+                session.RefreshToken = null;
+                session.RefreshTokenExpiryTime = null;
+            }
+
+            await context.SaveChangesAsync();
+        }
+
+        public async Task LogoutAsync(Guid userId, string sessionId)
+        {
+            // Invalidar solo la sesión especifica
+            var session = await context.UserSessions
+                .FirstOrDefaultAsync(s => s.UserId == userId && s.SessionId == sessionId);
+
+            if (session is not null)
+            {
+                session.IsActive = false;
+                session.RefreshToken = null;
+                session.RefreshTokenExpiryTime = null;
                 await context.SaveChangesAsync();
             }
         }
 
-        private string CreateToken(User user)
+        private string CreateToken(User user, UserSession session)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, user.Username),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Role, user.Role),
-                new Claim("SessionId", user.SessionId ?? string.Empty)
+                new Claim("SessionId", session.SessionId)
             };
 
             var key = new SymmetricSecurityKey(

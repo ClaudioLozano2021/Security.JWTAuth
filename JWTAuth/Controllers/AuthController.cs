@@ -79,10 +79,13 @@ namespace JwtAuthDotNet9.Controllers
         public async Task<IActionResult> Logout()
         {
             var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
-            if (userIdClaim != null)
+            var sessionIdClaim = User.FindFirst("SessionId");
+            
+            if (userIdClaim != null && sessionIdClaim != null)
             {
                 var userId = Guid.Parse(userIdClaim.Value);
-                await authService.LogoutAsync(userId);
+                var sessionId = sessionIdClaim.Value;
+                await authService.LogoutAsync(userId, sessionId);
             }
 
             return Ok("Logged out successfully");
@@ -96,11 +99,29 @@ namespace JwtAuthDotNet9.Controllers
                 // Si es una IP local de IPv6, convertir a IPv4
                 if (ipAddress.IsIPv4MappedToIPv6)
                 {
-                    return ipAddress.MapToIPv4().ToString();
+                    ipAddress = ipAddress.MapToIPv4();
                 }
-                return ipAddress.ToString();
+                
+                // Normalizar IPs locales para que todas las conexiones desde la misma máquina 
+                // sean tratadas como la misma IP
+                var ipString = ipAddress.ToString();
+                if (IsLocalMachineIp(ipString))
+                {
+                    return "localhost";
+                }
+                
+                return ipString;
             }
-            return null;
+            return "localhost";
+        }
+
+        private static bool IsLocalMachineIp(string ip)
+        {
+            return ip == "127.0.0.1" || 
+                   ip == "::1" || 
+                   ip == "localhost" ||
+                   ip.StartsWith("::ffff:127.0.0.1") ||
+                   ip == "::ffff:127.0.0.1";
         }
     }
 }

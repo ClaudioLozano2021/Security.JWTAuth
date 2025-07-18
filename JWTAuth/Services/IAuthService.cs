@@ -10,5 +10,6 @@ namespace JwtAuthDotNet9.Services
         Task<TokenResponseDto?> RefreshTokensAsync(RefreshTokenRequestDto request);
         Task<bool> IsSessionValidAsync(Guid userId, string sessionId);
         Task LogoutAsync(Guid userId);
+        Task LogoutAsync(Guid userId, string sessionId);
     }
 }
