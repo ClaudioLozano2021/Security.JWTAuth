@@ -40,7 +40,9 @@ namespace JwtAuthDotNet9.Services
             return new TokenResponseDto
             {
                 AccessToken = CreateToken(user, session),
-                RefreshToken = await GenerateAndSaveRefreshTokenAsync(session)
+                RefreshToken = await GenerateAndSaveRefreshTokenAsync(session),
+                Username = user.Username,
+                Role = user.Role
             };
         }
 

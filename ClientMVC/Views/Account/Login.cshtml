@@ -1,0 +1,37 @@
+@model ClientMVC.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-4">
+        <h1 class="text-center">@ViewData["Title"]</h1>
+        <section>
+            <form asp-action="Login">
+                <hr />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Username" class="form-control" autocomplete="username" aria-required="true" />
+                    <label asp-for="Username" class="form-label">Nombre de Usuario</label>
+                    <span asp-validation-for="Username" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Password" class="form-control" aria-required="true" />
+                    <label asp-for="Password" class="form-label">Contraseña</label>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div>
+                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Iniciar Sesión</button>
+                </div>
+            </form>
+        </section>
+        <div class="text-center mt-4">
+            <p>@ViewData["TokenStatus"]</p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -91,6 +91,13 @@ namespace JwtAuthDotNet9.Controllers
             return Ok("Logged out successfully");
         }
 
+        [HttpGet("validate-session")]
+        public async Task<IActionResult> ValidateSession([FromQuery] Guid userId, [FromQuery] string sessionId)
+        {
+            var isValid = await authService.IsSessionValidAsync(userId, sessionId);
+            return Ok(isValid);
+        }
+
         private string? GetClientIpAddress()
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress;

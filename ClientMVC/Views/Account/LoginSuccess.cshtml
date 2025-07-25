@@ -1,0 +1,14 @@
+@{
+    ViewData["Title"] = "Inicio de Sesión Exitoso";
+}
+
+<div class="text-center">
+    <h1 class="display-4">¡Inicio de Sesión Exitoso!</h1>
+    <p>Has iniciado sesión correctamente en la aplicación.</p>
+    <p>¡Bienvenido, @ViewData["Username"]!</p>
+    <p>Tu rol: @ViewData["Role"]</p>
+    <p>Ahora puedes acceder al <a href="@Url.Action("Secret", "Account")">contenido secreto</a>.</p>
+    <div class="mt-4">
+        <a asp-controller="Account" asp-action="Logout" class="btn btn-danger">Cerrar Sesión</a>
+    </div>
+</div>
