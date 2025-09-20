@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Test de Autenticación";
+}
+
+<h1>Prueba de Autenticación con ProtectedApi</h1>
+
+<div class="mt-4">
+    @if (ViewData["Success"] != null)
+    {
+        @if ((bool)ViewData["Success"])
+        {
+            <div class="alert alert-success">
+                <h4>✓ Autenticación Exitosa</h4>
+                <p>@ViewData["TestResult"]</p>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                <h4>✗ Error de Autenticación</h4>
+                <p>@ViewData["TestResult"]</p>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p>Esta página probará la conexión autenticada con ProtectedApi.</p>
+        </div>
+    }
+</div>
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-primary">Volver a Productos</a>
+    <a asp-controller="Account" asp-action="LoginSuccess" class="btn btn-secondary">Volver al Inicio</a>
+</div>

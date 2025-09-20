@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "Health Check";
+}
+
+<h1>Health Check - Conectividad con ProtectedApi</h1>
+
+<div class="mt-4">
+    @if (ViewData["Success"] != null)
+    {
+        @if ((bool)ViewData["Success"])
+        {
+            <div class="alert alert-success">
+                <h4>✅ Conectividad OK</h4>
+                <p>@ViewData["HealthResult"]</p>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                <h4>❌ Error de Conectividad</h4>
+                <p>@ViewData["HealthResult"]</p>
+                <hr>
+                <p class="mb-0">
+                    <strong>Posibles causas:</strong><br>
+                    • ProtectedApi no está corriendo en puerto 5141<br>
+                    • Problema de red o firewall<br>
+                    • Configuración incorrecta de HttpClient
+                </p>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p>Esta página prueba la conectividad básica con ProtectedApi (sin autenticación).</p>
+        </div>
+    }
+</div>
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-primary">Volver a Productos</a>
+    <a asp-controller="Account" asp-action="LoginSuccess" class="btn btn-secondary">Volver al Inicio</a>
+</div>

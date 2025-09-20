@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Simple JWT Test";
+}
+
+<h1>Simple JWT Authentication Test</h1>
+
+<div class="mt-4">
+    @if (ViewData["Success"] != null)
+    {
+        @if ((bool)ViewData["Success"])
+        {
+            <div class="alert alert-success">
+                <h4>✅ JWT Authentication OK</h4>
+                <p><strong>Result:</strong></p>
+                <pre>@ViewData["SimpleResult"]</pre>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                <h4>❌ JWT Authentication Failed</h4>
+                <p><strong>Result:</strong></p>
+                <pre>@ViewData["SimpleResult"]</pre>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p>Esta página prueba JWT authentication básico (sin middleware de sesión).</p>
+        </div>
+    }
+</div>
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-primary">Productos Completos</a>
+    <a asp-controller="Account" asp-action="LoginSuccess" class="btn btn-secondary">Volver al Inicio</a>
+</div>

@@ -3,17 +3,17 @@ using System.Text;
 using System.Text.Json;
 using ClientMVC.Models;
 using System.Diagnostics;
-using System.Net.Http.Headers; // Added this line
+using System.Net.Http.Headers;
+using ClientMVC.Services;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ClientMVC.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
-        private readonly IHttpClientFactory _httpClientFactory;
-
-        public AccountController(IHttpClientFactory httpClientFactory)
+        public AccountController(ITokenService tokenService, IHttpClientFactory httpClientFactory)
+            : base(tokenService, httpClientFactory)
         {
-            _httpClientFactory = httpClientFactory;
         }
 
         [HttpGet]
@@ -31,6 +31,14 @@ namespace ClientMVC.Controllers
             return View();
         }
 
+        [Authorize]
+        public IActionResult LoginSuccess()
+        {
+            ViewData["Username"] = HttpContext.Session.GetString("Username");
+            ViewData["Role"] = HttpContext.Session.GetString("Role");
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
@@ -39,6 +47,7 @@ namespace ClientMVC.Controllers
                 return View(model);
             }
 
+            // Para login no necesitamos token autorizado
             var client = _httpClientFactory.CreateClient("JWTAuthAPI");
             var json = JsonSerializer.Serialize(model);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -52,7 +61,17 @@ namespace ClientMVC.Controllers
 
                 if (tokenResponse?.AccessToken != null)
                 {
-                    HttpContext.Session.SetString("JWToken", tokenResponse.AccessToken);
+                    Console.WriteLine($"=== LOGIN EXITOSO ===");
+                    Console.WriteLine($"Token recibido: {tokenResponse.AccessToken.Substring(0, Math.Min(50, tokenResponse.AccessToken.Length))}...");
+                    Console.WriteLine($"Username: {tokenResponse.Username}");
+                    Console.WriteLine($"Role: {tokenResponse.Role}");
+                    
+                    await _tokenService.StoreToken(HttpContext, tokenResponse.AccessToken, tokenResponse.Username ?? "", tokenResponse.Role ?? "");
+                    
+                    // Verificar que se guardó correctamente
+                    var storedToken = _tokenService.GetToken(HttpContext);
+                    Console.WriteLine($"Token almacenado verificado: {(storedToken != null ? "✅ OK" : "❌ ERROR")}");
+                    
                     ViewData["Username"] = tokenResponse.Username;
                     ViewData["Role"] = tokenResponse.Role;
                     return View("LoginSuccess"); 
@@ -63,22 +82,22 @@ namespace ClientMVC.Controllers
             return View(model);
         }
 
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.Session.Clear();
+            await _tokenService.ClearToken(HttpContext);
             return RedirectToAction("Login", "Account");
         }
 
-        // Mover la acción Secret aquí si se desea mantenerla
+        [Authorize]
         public async Task<IActionResult> Secret()
         {
-            var token = HttpContext.Session.GetString("JWToken");
-            if (string.IsNullOrEmpty(token))
+            var token = _tokenService.GetToken(HttpContext);
+            if (!_tokenService.IsTokenValid(HttpContext))
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            var client = _httpClientFactory.CreateClient("JWTAuthAPI");
+            var client = CreateAuthorizedClient("JWTAuthAPI");
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await client.GetAsync("api/secret");

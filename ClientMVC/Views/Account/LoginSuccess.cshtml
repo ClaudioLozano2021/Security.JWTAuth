@@ -9,6 +9,11 @@
     <p>Tu rol: @ViewData["Role"]</p>
     <p>Ahora puedes acceder al <a href="@Url.Action("Secret", "Account")">contenido secreto</a>.</p>
     <div class="mt-4">
+        <a asp-controller="Products" asp-action="Index" class="btn btn-primary me-2">Ver Lista de Productos</a>
+        <a asp-controller="Products" asp-action="SimpleTest" class="btn btn-success me-2">Test Simple JWT</a>
+        <a asp-controller="Products" asp-action="HealthCheck" class="btn btn-info">Health Check</a>
+    </div>
+    <div class="mt-4">
         <a asp-controller="Account" asp-action="Logout" class="btn btn-danger">Cerrar Sesión</a>
     </div>
 </div>

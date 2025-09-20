@@ -26,11 +26,11 @@ namespace JwtAuthDotNet9.Services
                 return null;
             }
 
-            // Invalidar sesiones de diferentes IPs
-            await InvalidateSessionsFromOtherIpsAsync(user.Id, clientIp);
+            // Invalidar todas las sesiones activas anteriores del usuario
+            await InvalidateAllActiveSessionsForUserAsync(user.Id);
 
-            // Crear o reutilizar sesión para esta IP
-            var session = await CreateOrUpdateSessionAsync(user.Id, clientIp);
+            // Crear una nueva sesión para este login
+            var session = await CreateNewSessionAsync(user.Id, clientIp);
 
             return await CreateTokenResponse(user, session);
         }
@@ -110,24 +110,26 @@ namespace JwtAuthDotNet9.Services
             return refreshToken;
         }
 
-        private async Task InvalidateSessionsFromOtherIpsAsync(Guid userId, string? clientIp)
+        private async Task InvalidateAllActiveSessionsForUserAsync(Guid userId)
         {
-            // Invalidar sesiones activas de diferentes IPs
+            // Invalida todas las sesiones activas para un usuario específico.
             var sessionsToInvalidate = await context.UserSessions
-                .Where(s => s.UserId == userId && s.IsActive && s.IpAddress != clientIp)
+                .Where(s => s.UserId == userId && s.IsActive)
                 .ToListAsync();
 
-            foreach (var session in sessionsToInvalidate)
+            if (sessionsToInvalidate.Any())
             {
-                session.IsActive = false;
-                session.RefreshToken = null;
-                session.RefreshTokenExpiryTime = null;
+                foreach (var session in sessionsToInvalidate)
+                {
+                    session.IsActive = false;
+                    session.RefreshToken = null;
+                    session.RefreshTokenExpiryTime = null;
+                }
+                await context.SaveChangesAsync();
             }
-
-            await context.SaveChangesAsync();
         }
 
-        private async Task<UserSession> CreateOrUpdateSessionAsync(Guid userId, string? clientIp)
+        private async Task<UserSession> CreateNewSessionAsync(Guid userId, string? clientIp)
         {
             // Siempre crear una nueva sesión para permitir múltiples sesiones por IP
             var newSession = new UserSession

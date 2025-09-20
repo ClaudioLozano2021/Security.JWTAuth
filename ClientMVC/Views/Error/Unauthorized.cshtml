@@ -1,0 +1,42 @@
+@{
+    ViewData["Title"] = "No Autorizado";
+}
+
+<div class="text-center">
+    <div class="alert alert-warning" style="max-width: 600px; margin: 2rem auto;">
+        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #ffc107; margin-bottom: 1rem;"></i>
+        <h2 class="alert-heading">🚫 Acceso No Autorizado</h2>
+        <hr>
+        <p class="mb-3">
+            <strong>No tienes permisos para acceder a esta página.</strong><br>
+            Necesitas iniciar sesión para continuar.
+        </p>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg me-md-2">
+                🔐 Iniciar Sesión
+            </a>
+            <a href="javascript:history.back()" class="btn btn-secondary btn-lg">
+                ← Volver
+            </a>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <small class="text-muted">
+            Si crees que esto es un error, contacta al administrador del sistema.
+        </small>
+    </div>
+</div>
+
+<style>
+    .alert {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+    
+    .btn-lg {
+        padding: 10px 25px;
+        font-weight: 600;
+    }
+</style>

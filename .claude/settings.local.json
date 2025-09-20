@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(dotnet ef migrations add:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(dotnet build:*)",
+      "Bash(rm:*)",
+      "Bash(curl:*)",
+      "Bash(find:*)",
+      "Read(//mnt/e/PROYECTOS/QUALITY/PROYECTO/React_Login/**)",
+      "Bash(npm install)",
+      "Bash(npm run dev:*)"
     ],
     "deny": []
   }

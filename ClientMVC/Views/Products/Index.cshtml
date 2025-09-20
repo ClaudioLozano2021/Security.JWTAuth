@@ -1,0 +1,55 @@
+@model List<ClientMVC.Models.Product>
+
+@{ 
+    ViewData["Title"] = "Lista de Productos";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (Model != null && Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model)
+            {
+                <tr>
+                    <td>@product.Id</td>
+                    <td>@product.Name</td>
+                    <td>@product.Price.ToString("C")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    @if (ViewData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            <h4>Error al cargar productos</h4>
+            <p>@ViewData["ErrorMessage"]</p>
+            <hr>
+            <p class="mb-0">
+                <a asp-controller="Account" asp-action="Login" class="btn btn-primary">Volver a iniciar sesión</a>
+                <a asp-controller="Products" asp-action="TestAuth" class="btn btn-secondary">Probar autenticación</a>
+            </p>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <p>No se encontraron productos en este momento.</p>
+        </div>
+    }
+}
+
+<div>
+    <a asp-controller="Account" asp-action="LoginSuccess">Volver al Inicio</a>
+</div>

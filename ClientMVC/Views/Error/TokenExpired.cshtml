@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Sesión Expirada";
+}
+
+<div class="text-center">
+    <div class="alert alert-info" style="max-width: 600px; margin: 2rem auto;">
+        <i class="fas fa-clock" style="font-size: 3rem; color: #17a2b8; margin-bottom: 1rem;"></i>
+        <h2 class="alert-heading">⏰ Sesión Expirada</h2>
+        <hr>
+        <p class="mb-3">
+            <strong>Tu sesión ha expirado por seguridad.</strong><br>
+            Por favor, inicia sesión nuevamente para continuar.
+        </p>
+        
+        <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+            <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg me-md-2">
+                🔄 Iniciar Sesión Nuevamente
+            </a>
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <small class="text-muted">
+            Las sesiones expiran automáticamente después de 30 minutos de inactividad.
+        </small>
+    </div>
+</div>
+
+<style>
+    .alert {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+    }
+    
+    .btn-lg {
+        padding: 10px 25px;
+        font-weight: 600;
+    }
+</style>
